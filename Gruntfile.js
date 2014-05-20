@@ -77,7 +77,7 @@ module.exports = function (grunt) {
   grunt.registerTask('serve', ['build', 'connect:livereload', 'open', 'watch']);
   grunt.registerTask('default', ['serve']);
   grunt.registerTask('prod', ['build', 'copy']);
-  grunt.registerTask('heroku', ['build']);
+  grunt.registerTask('heroku', ['build', 'copy']);
 
   grunt.registerTask('buildBootstrapper', 'builds the bootstrapper file correctly', function() {
     var stateFiles = grunt.file.expand('game/states/*.js');
