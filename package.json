@@ -12,7 +12,6 @@
     "connect-livereload": "~0.1.3",
     "moment": "~2.0.0",
     "grunt-html-build": "~0.3.2",
-    "underscore": "*",
     "underscore.string": "*",
     "browserify": "~3.38.0",
     "grunt-browserify": "~1.3.0"
@@ -21,6 +20,7 @@
     "node": "~0.10.28"
   },
   "dependencies": {
-    "express": "~4.2.0"
+    "express": "~4.2.0",
+    "underscore": "*"
   }
 }
