@@ -63,32 +63,18 @@ GameOver.prototype = {
 module.exports = GameOver;
 
 },{}],4:[function(require,module,exports){
-
 'use strict';
 function Menu() {}
 
 Menu.prototype = {
   preload: function() {
-
   },
   create: function() {
-    var style = { font: '65px Arial', fill: '#ffffff', align: 'center'};
-    this.sprite = this.game.add.sprite(this.game.world.centerX, 138, 'yeoman');
-    this.sprite.anchor.setTo(0.5, 0.5);
-
-    this.titleText = this.game.add.text(this.game.world.centerX, 300, '\'Allo, \'Allo!', style);
-    this.titleText.anchor.setTo(0.5, 0.5);
-
-    this.instructionsText = this.game.add.text(this.game.world.centerX, 400, 'Click anywhere to play "Click The Yeoman Logo"', { font: '16px Arial', fill: '#ffffff', align: 'center'});
-    this.instructionsText.anchor.setTo(0.5, 0.5);
-
-    this.sprite.angle = -20;
-    this.game.add.tween(this.sprite).to({angle: 20}, 1000, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+    this.background = this.game.add.sprite(0, 0, 'background');
+    this.ground = this.game.add.tileSprite(0, 400, 335, 112, 'ground');
+    this.ground.autoScroll(-200, 0);
   },
   update: function() {
-    if(this.game.input.activePointer.justPressed()) {
-      this.game.state.start('play');
-    }
   }
 };
 
@@ -122,7 +108,6 @@ module.exports = Menu;
   
   module.exports = Play;
 },{}],6:[function(require,module,exports){
-
 'use strict';
 function Preload() {
   this.asset = null;
@@ -133,11 +118,15 @@ Preload.prototype = {
   preload: function() {
     this.asset = this.add.sprite(this.width/2,this.height/2, 'preloader');
     this.asset.anchor.setTo(0.5, 0.5);
-
     this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
     this.load.setPreloadSprite(this.asset);
-    this.load.image('yeoman', 'assets/yeoman-logo.png');
 
+    this.load.image('background', 'assets/background.png');
+    this.load.image('ground', 'assets/ground.png');
+    this.load.image('title', 'assets/title.png');
+    this.load.image('startButton', 'assets/start-button.png');
+
+    this.load.spritesheet('duck', 'assets/duck.png', 34, 24, 3);
   },
   create: function() {
     this.asset.cropEnabled = false;
