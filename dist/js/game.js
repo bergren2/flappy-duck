@@ -110,6 +110,26 @@ var PipeGroup = function(game, parent) {
 PipeGroup.prototype = Object.create(Phaser.Group.prototype);
 PipeGroup.prototype.constructor = PipeGroup;
 
+PipeGroup.prototype.reset = function (x, y) {
+    this.topPipe.reset(0, 0);
+    this.bottomPipe.reset(0, 440);
+    this.x = x;
+    this.y = y;
+    this.setAll('body.velocity.x', -200);
+    this.hasScored = false;
+    this.exists = true;
+};
+
+PipeGroup.prototype.checkWorldBounds = function () {
+    if (!this.topPipe.inWorld) {
+        this.exists = false;
+    }
+};
+
+PipeGroup.prototype.update = function () {
+    this.checkWorldBounds();
+};
+
 module.exports = PipeGroup;
 
 },{"./pipe":4}],6:[function(require,module,exports){
@@ -222,6 +242,8 @@ Play.prototype = {
         this.duck = new Duck(this.game, 100, this.game.height / 2);
         this.game.add.existing(this.duck);
 
+        this.pipes = this.game.add.group();
+
         this.ground = new Ground(this.game, 0, 400, 335, 112);
         this.game.add.existing(this.ground);
 
@@ -242,9 +264,13 @@ Play.prototype = {
 
     generatePipes: function () {
         var pipeY = this.game.rnd.integerInRange(-100, 100);
-        var pipeGroup = new PipeGroup(this.game);
-        pipeGroup.x = this.game.width;
-        pipeGroup.y = pipeY;
+        var pipeGroup = this.pipes.getFirstExists(false);
+
+        if (!pipeGroup) {
+            pipeGroup = new PipeGroup(this.game, this.pipes);
+        }
+
+        pipeGroup.reset(this.game.width, pipeY);
     }
 };
 
