@@ -15,11 +15,16 @@ Duck.prototype = Object.create(Phaser.Sprite.prototype);
 Duck.prototype.constructor = Duck;
 
 Duck.prototype.update = function () {
-    // write your prefab's specific update code here
+    if (this.angle < 90) {
+        this.angle += 2.5;
+    }
 };
 
 Duck.prototype.flap = function () {
     this.body.velocity.y = -400;
+    this.game.add.tween(this).to({
+        angle: -40
+    }, 100).start();
 };
 
 module.exports = Duck;

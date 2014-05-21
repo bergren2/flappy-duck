@@ -33,11 +33,16 @@ Duck.prototype = Object.create(Phaser.Sprite.prototype);
 Duck.prototype.constructor = Duck;
 
 Duck.prototype.update = function () {
-    // write your prefab's specific update code here
+    if (this.angle < 90) {
+        this.angle += 2.5;
+    }
 };
 
 Duck.prototype.flap = function () {
     this.body.velocity.y = -400;
+    this.game.add.tween(this).to({
+        angle: -40
+    }, 100).start();
 };
 
 module.exports = Duck;
@@ -139,9 +144,9 @@ Menu.prototype = {
     this.titleGroup.x = 30;
     this.titleGroup.y = 100;
 
-    this.game.add.tween(this.titleGroup).to(
-        {y: 115}, 350, Phaser.Easing.Linear.NONE, true, 0, 1000, true
-    );
+    this.game.add.tween(this.titleGroup).to({
+        y: 115
+    }, 350, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
 
     // start button
     this.startButton = this.game.add.button(
@@ -167,7 +172,7 @@ function Play() {}
 Play.prototype = {
     create: function () {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        this.game.physics.arcade.gravity.y = 500;
+        this.game.physics.arcade.gravity.y = 1200;
         this.background = this.game.add.sprite(0, 0, 'background');
 
         this.duck = new Duck(this.game, 100, this.game.height / 2);
@@ -215,8 +220,7 @@ Preload.prototype = {
     },
     update: function () {
         if(!!this.ready) {
-            // TODO: change back to 'menu'
-            this.game.state.start('play');
+            this.game.state.start('menu');
         }
     },
     onLoadComplete: function () {

@@ -23,8 +23,7 @@ Preload.prototype = {
     },
     update: function () {
         if(!!this.ready) {
-            // TODO: change back to 'menu'
-            this.game.state.start('play');
+            this.game.state.start('menu');
         }
     },
     onLoadComplete: function () {
