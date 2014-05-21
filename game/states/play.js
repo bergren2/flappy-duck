@@ -1,26 +1,23 @@
+'use strict';
+var Duck = require('../prefabs/duck');
+var Ground = require('../prefabs/ground');
 
-  'use strict';
-  function Play() {}
-  Play.prototype = {
-    create: function() {
-      this.game.physics.startSystem(Phaser.Physics.ARCADE);
-      this.sprite = this.game.add.sprite(this.game.width/2, this.game.height/2, 'yeoman');
-      this.sprite.inputEnabled = true;
-      
-      this.game.physics.arcade.enable(this.sprite);
-      this.sprite.body.collideWorldBounds = true;
-      this.sprite.body.bounce.setTo(1,1);
-      this.sprite.body.velocity.x = this.game.rnd.integerInRange(-500,500);
-      this.sprite.body.velocity.y = this.game.rnd.integerInRange(-500,500);
+function Play() {}
+Play.prototype = {
+    create: function () {
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        this.game.physics.arcade.gravity.y = 500;
+        this.background = this.game.add.sprite(0, 0, 'background');
 
-      this.sprite.events.onInputDown.add(this.clickListener, this);
+        this.duck = new Duck(this.game, 100, this.game.height / 2);
+        this.game.add.existing(this.duck);
+
+        this.ground = new Ground(this.game, 0, 400, 335, 112);
+        this.game.add.existing(this.ground);
     },
-    update: function() {
-
-    },
-    clickListener: function() {
-      this.game.state.start('gameover');
+    update: function () {
+        this.game.physics.arcade.collide(this.duck, this.ground);
     }
-  };
-  
-  module.exports = Play;
+};
+
+module.exports = Play;

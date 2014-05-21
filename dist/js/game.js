@@ -15,7 +15,52 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":2,"./states/gameover":3,"./states/menu":4,"./states/play":5,"./states/preload":6}],2:[function(require,module,exports){
+},{"./states/boot":4,"./states/gameover":5,"./states/menu":6,"./states/play":7,"./states/preload":8}],2:[function(require,module,exports){
+'use strict';
+
+var Duck = function (game, x, y, frame) {
+    Phaser.Sprite.call(this, game, x, y, 'duck', frame);
+
+    this.anchor.setTo(0.5, 0.5);
+
+    this.animations.add('flap');
+    this.animations.play('flap', 12, true);
+
+    this.game.physics.arcade.enableBody(this);
+};
+
+Duck.prototype = Object.create(Phaser.Sprite.prototype);
+Duck.prototype.constructor = Duck;
+
+Duck.prototype.update = function () {
+    // write your prefab's specific update code here
+};
+
+module.exports = Duck;
+
+},{}],3:[function(require,module,exports){
+'use strict';
+
+var Ground = function(game, x, y, width, height) {
+    Phaser.TileSprite.call(this, game, x, y, width, height, 'ground');
+
+    this.autoScroll(-200, 0);
+
+    this.game.physics.arcade.enableBody(this);
+    this.body.allowGravity = false;
+    this.body.immovable = true;
+};
+
+Ground.prototype = Object.create(Phaser.TileSprite.prototype);
+Ground.prototype.constructor = Ground;
+
+Ground.prototype.update = function() {
+    // write your prefab's specific update code here
+};
+
+module.exports = Ground;
+
+},{}],4:[function(require,module,exports){
 
 'use strict';
 
@@ -34,7 +79,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -62,7 +107,7 @@ GameOver.prototype = {
 };
 module.exports = GameOver;
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 function Menu() {}
 
@@ -109,65 +154,64 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+'use strict';
+var Duck = require('../prefabs/duck');
+var Ground = require('../prefabs/ground');
 
-  'use strict';
-  function Play() {}
-  Play.prototype = {
-    create: function() {
-      this.game.physics.startSystem(Phaser.Physics.ARCADE);
-      this.sprite = this.game.add.sprite(this.game.width/2, this.game.height/2, 'yeoman');
-      this.sprite.inputEnabled = true;
-      
-      this.game.physics.arcade.enable(this.sprite);
-      this.sprite.body.collideWorldBounds = true;
-      this.sprite.body.bounce.setTo(1,1);
-      this.sprite.body.velocity.x = this.game.rnd.integerInRange(-500,500);
-      this.sprite.body.velocity.y = this.game.rnd.integerInRange(-500,500);
+function Play() {}
+Play.prototype = {
+    create: function () {
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        this.game.physics.arcade.gravity.y = 500;
+        this.background = this.game.add.sprite(0, 0, 'background');
 
-      this.sprite.events.onInputDown.add(this.clickListener, this);
+        this.duck = new Duck(this.game, 100, this.game.height / 2);
+        this.game.add.existing(this.duck);
+
+        this.ground = new Ground(this.game, 0, 400, 335, 112);
+        this.game.add.existing(this.ground);
     },
-    update: function() {
-
-    },
-    clickListener: function() {
-      this.game.state.start('gameover');
+    update: function () {
+        this.game.physics.arcade.collide(this.duck, this.ground);
     }
-  };
-  
-  module.exports = Play;
-},{}],6:[function(require,module,exports){
+};
+
+module.exports = Play;
+
+},{"../prefabs/duck":2,"../prefabs/ground":3}],8:[function(require,module,exports){
 'use strict';
 function Preload() {
-  this.asset = null;
-  this.ready = false;
+    this.asset = null;
+    this.ready = false;
 }
 
 Preload.prototype = {
-  preload: function() {
-    this.asset = this.add.sprite(this.width / 2, this.height / 2, 'preloader');
-    this.asset.anchor.setTo(0.5, 0.5);
-    this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
-    this.load.setPreloadSprite(this.asset);
+    preload: function () {
+        this.asset = this.add.sprite(this.width / 2, this.height / 2, 'preloader');
+        this.asset.anchor.setTo(0.5, 0.5);
+        this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
+        this.load.setPreloadSprite(this.asset);
 
-    this.load.image('background', 'assets/background.png');
-    this.load.image('ground', 'assets/ground.png');
-    this.load.image('title', 'assets/title.png');
-    this.load.image('startButton', 'assets/start-button.png');
+        this.load.image('background', 'assets/background.png');
+        this.load.image('ground', 'assets/ground.png');
+        this.load.image('title', 'assets/title.png');
+        this.load.image('startButton', 'assets/start-button.png');
 
-    this.load.spritesheet('duck', 'assets/duck.png', 34, 24, 3);
-  },
-  create: function() {
-    this.asset.cropEnabled = false;
-  },
-  update: function() {
-    if(!!this.ready) {
-      this.game.state.start('menu');
+        this.load.spritesheet('duck', 'assets/duck.png', 34, 24, 3);
+    },
+    create: function () {
+        this.asset.cropEnabled = false;
+    },
+    update: function () {
+        if(!!this.ready) {
+            // TODO: change back to 'menu'
+            this.game.state.start('play');
+        }
+    },
+    onLoadComplete: function () {
+        this.ready = true;
     }
-  },
-  onLoadComplete: function() {
-    this.ready = true;
-  }
 };
 
 module.exports = Preload;
