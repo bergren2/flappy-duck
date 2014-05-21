@@ -20,6 +20,9 @@ Preload.prototype = {
 
         this.load.spritesheet('duck', 'assets/duck.png', 34, 24, 3);
         this.load.spritesheet('pipe', 'assets/pipes.png', 54, 320, 2);
+
+        var fontDirectory = 'assets/fonts/flappyfont';
+        this.load.bitmapFont('flappyfont', fontDirectory + '/flappyfont.png', fontDirectory + '/flappyfont.fnt');
     },
     create: function () {
         this.asset.cropEnabled = false;

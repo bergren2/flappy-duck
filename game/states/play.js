@@ -9,6 +9,7 @@ Play.prototype = {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.physics.arcade.gravity.y = 1200;
         this.background = this.game.add.sprite(0, 0, 'background');
+        this.score = 0;
 
         // prefabs
         this.duck = new Duck(this.game, 100, this.game.height / 2);
@@ -33,24 +34,21 @@ Play.prototype = {
 
         // instructions
         this.instructionGroup = this.game.add.group();
-        this.instructionGroup.add(this.game.add.sprite(
-            this.game.width / 2, 100, 'getReady'
-        ));
-        this.instructionGroup.add(this.game.add.sprite(
-            this.game.width / 2, 325, 'instructions'
-        ));
+        this.instructionGroup.add(this.game.add.sprite(this.game.width / 2, 100, 'getReady'));
+        this.instructionGroup.add(this.game.add.sprite(this.game.width / 2, 325, 'instructions'));
         this.instructionGroup.setAll('anchor.x', 0.5);
         this.instructionGroup.setAll('anchor.y', 0.5);
+
+        // score
+        this.scoreText = this.game.add.bitmapText(this.game.width / 2, 10, 'flappyfont', this.score.toString(), 24);
+        this.scoreText.visible = false;
     },
 
     update: function () {
-        this.game.physics.arcade.collide(
-            this.duck, this.ground, this.deathHandler, null, this
-        );
+        this.game.physics.arcade.collide(this.duck, this.ground, this.deathHandler, null, this);
         this.pipes.forEach(function (pipeGroup) {
-            this.game.physics.arcade.collide(
-                this.duck, pipeGroup, this.deathHandler, null, this
-            )
+            this.checkScore(pipeGroup);
+            this.game.physics.arcade.collide(this.duck, pipeGroup, this.deathHandler, null, this);
         }, this);
     },
 
@@ -78,14 +76,21 @@ Play.prototype = {
     startGame: function () {
         this.duck.body.allowGravity = true;
         this.duck.alive = true;
+        this.scoreText.visible = true;
 
         this.instructionGroup.destroy();
 
         // makin' pipes
-        this.pipeGenerator = this.game.time.events.loop(
-            Phaser.Timer.SECOND * 1.25, this.generatePipes, this
-        );
+        this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
         this.pipeGenerator.timer.start();
+    },
+
+    checkScore: function (pipeGroup) {
+        if (pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.duck.world.x) {
+            pipeGroup.hasScored = true;
+            this.score++;
+            this.scoreText.setText(this.score.toString());
+        }
     }
 };
 

@@ -25,14 +25,10 @@ Menu.prototype = {
     this.titleGroup.x = 30;
     this.titleGroup.y = 100;
 
-    this.game.add.tween(this.titleGroup).to({
-        y: 115
-    }, 350, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+    this.game.add.tween(this.titleGroup).to({y: 115}, 350, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
 
     // start button
-    this.startButton = this.game.add.button(
-        this.game.width / 2, 300, 'startButton', this.startClick, this
-    );
+    this.startButton = this.game.add.button(this.game.width / 2, 300, 'startButton', this.startClick, this);
     this.startButton.anchor.setTo(0.5, 0.5);
   },
   startClick: function() {
