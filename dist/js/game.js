@@ -15,7 +15,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":4,"./states/gameover":5,"./states/menu":6,"./states/play":7,"./states/preload":8}],2:[function(require,module,exports){
+},{"./states/boot":6,"./states/gameover":7,"./states/menu":8,"./states/play":9,"./states/preload":10}],2:[function(require,module,exports){
 'use strict';
 
 var Duck = function (game, x, y, frame) {
@@ -70,6 +70,49 @@ Ground.prototype.update = function() {
 module.exports = Ground;
 
 },{}],4:[function(require,module,exports){
+'use strict';
+
+var Pipe = function(game, x, y, frame) {
+    Phaser.Sprite.call(this, game, x, y, 'pipe', frame);
+    this.anchor.setTo(0.5, 0.5);
+    this.game.physics.arcade.enableBody(this);
+
+    this.body.allowGravity = false;
+    this.body.immovable = true;
+};
+
+Pipe.prototype = Object.create(Phaser.Sprite.prototype);
+Pipe.prototype.constructor = Pipe;
+
+Pipe.prototype.update = function() {
+};
+
+module.exports = Pipe;
+
+},{}],5:[function(require,module,exports){
+'use strict';
+var Pipe = require('./pipe');
+
+var PipeGroup = function(game, parent) {
+    Phaser.Group.call(this, game, parent);
+
+    this.topPipe = new Pipe(this.game, 0, 0, 0);
+    this.add(this.topPipe);
+
+    // 440 is a magic number
+    this.bottomPipe = new Pipe(this.game, 0, 440, 1);
+    this.add(this.bottomPipe);
+
+    this.setAll('body.velocity.x', -200);
+    this.hasScored = false;
+};
+
+PipeGroup.prototype = Object.create(Phaser.Group.prototype);
+PipeGroup.prototype.constructor = PipeGroup;
+
+module.exports = PipeGroup;
+
+},{"./pipe":4}],6:[function(require,module,exports){
 
 'use strict';
 
@@ -88,7 +131,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -116,7 +159,7 @@ GameOver.prototype = {
 };
 module.exports = GameOver;
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 function Menu() {}
 
@@ -163,10 +206,11 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
-var Duck = require('../prefabs/duck');
-var Ground = require('../prefabs/ground');
+var Duck      = require('../prefabs/duck');
+var Ground    = require('../prefabs/ground');
+var PipeGroup = require('../prefabs/pipeGroup');
 
 function Play() {}
 Play.prototype = {
@@ -185,16 +229,28 @@ Play.prototype = {
         var flapKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         flapKey.onDown.add(this.duck.flap, this.duck);
         this.input.onDown.add(this.duck.flap, this.duck);
+
+        this.pipeGenerator = this.game.time.events.loop(
+            Phaser.Timer.SECOND * 1.25, this.generatePipes, this
+        );
+        this.pipeGenerator.timer.start();
     },
 
     update: function () {
         this.game.physics.arcade.collide(this.duck, this.ground);
+    },
+
+    generatePipes: function () {
+        var pipeY = this.game.rnd.integerInRange(-100, 100);
+        var pipeGroup = new PipeGroup(this.game);
+        pipeGroup.x = this.game.width;
+        pipeGroup.y = pipeY;
     }
 };
 
 module.exports = Play;
 
-},{"../prefabs/duck":2,"../prefabs/ground":3}],8:[function(require,module,exports){
+},{"../prefabs/duck":2,"../prefabs/ground":3,"../prefabs/pipeGroup":5}],10:[function(require,module,exports){
 'use strict';
 function Preload() {
     this.asset = null;
@@ -214,6 +270,7 @@ Preload.prototype = {
         this.load.image('startButton', 'assets/start-button.png');
 
         this.load.spritesheet('duck', 'assets/duck.png', 34, 24, 3);
+        this.load.spritesheet('pipe', 'assets/pipes.png', 54, 320, 2);
     },
     create: function () {
         this.asset.cropEnabled = false;

@@ -1,6 +1,7 @@
 'use strict';
-var Duck = require('../prefabs/duck');
-var Ground = require('../prefabs/ground');
+var Duck      = require('../prefabs/duck');
+var Ground    = require('../prefabs/ground');
+var PipeGroup = require('../prefabs/pipeGroup');
 
 function Play() {}
 Play.prototype = {
@@ -19,10 +20,22 @@ Play.prototype = {
         var flapKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
         flapKey.onDown.add(this.duck.flap, this.duck);
         this.input.onDown.add(this.duck.flap, this.duck);
+
+        this.pipeGenerator = this.game.time.events.loop(
+            Phaser.Timer.SECOND * 1.25, this.generatePipes, this
+        );
+        this.pipeGenerator.timer.start();
     },
 
     update: function () {
         this.game.physics.arcade.collide(this.duck, this.ground);
+    },
+
+    generatePipes: function () {
+        var pipeY = this.game.rnd.integerInRange(-100, 100);
+        var pipeGroup = new PipeGroup(this.game);
+        pipeGroup.x = this.game.width;
+        pipeGroup.y = pipeY;
     }
 };
 
