@@ -18,4 +18,8 @@ Duck.prototype.update = function () {
     // write your prefab's specific update code here
 };
 
+Duck.prototype.flap = function () {
+    this.body.velocity.y = -400;
+};
+
 module.exports = Duck;

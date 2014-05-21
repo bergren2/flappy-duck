@@ -14,7 +14,13 @@ Play.prototype = {
 
         this.ground = new Ground(this.game, 0, 400, 335, 112);
         this.game.add.existing(this.ground);
+
+        this.game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
+        var flapKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        flapKey.onDown.add(this.duck.flap, this.duck);
+        this.input.onDown.add(this.duck.flap, this.duck);
     },
+
     update: function () {
         this.game.physics.arcade.collide(this.duck, this.ground);
     }
