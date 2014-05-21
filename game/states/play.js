@@ -30,7 +30,14 @@ Play.prototype = {
     },
 
     update: function () {
-        this.game.physics.arcade.collide(this.duck, this.ground);
+        this.game.physics.arcade.collide(
+            this.duck, this.ground, this.deathHandler, null, this
+        );
+        this.pipes.forEach(function (pipeGroup) {
+            this.game.physics.arcade.collide(
+                this.duck, pipeGroup, this.deathHandler, null, this
+            )
+        }, this);
     },
 
     generatePipes: function () {
@@ -42,6 +49,16 @@ Play.prototype = {
         }
 
         pipeGroup.reset(this.game.width, pipeY);
+    },
+
+    deathHandler: function () {
+        this.game.state.start('gameover');
+    },
+
+    shutdown: function () {
+        this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
+        this.duck.destroy();
+        this.pipes.destroy();
     }
 };
 
