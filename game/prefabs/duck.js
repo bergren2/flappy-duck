@@ -8,14 +8,17 @@ var Duck = function (game, x, y, frame) {
     this.animations.add('flap');
     this.animations.play('flap', 12, true);
 
+    this.alive = false;
+
     this.game.physics.arcade.enableBody(this);
+    this.body.allowGravity = false;
 };
 
 Duck.prototype = Object.create(Phaser.Sprite.prototype);
 Duck.prototype.constructor = Duck;
 
 Duck.prototype.update = function () {
-    if (this.angle < 90) {
+    if (this.angle < 90 && this.alive) {
         this.angle += 2.5;
     }
 };
