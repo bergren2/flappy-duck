@@ -22,17 +22,9 @@ Play.prototype = {
         this.ground = new Ground(this.game, 0, 400, 335, 112);
         this.game.add.existing(this.ground);
 
-        // keyboard controls
-        this.flapKey = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        this.flapKey.onDown.addOnce(this.startGame, this);
-        this.flapKey.onDown.add(this.duck.flap, this.duck);
-
         // mouse / touch controls
         this.game.input.onDown.addOnce(this.startGame, this);
         this.game.input.onDown.add(this.duck.flap, this.duck);
-
-        // prevent propogation
-        this.game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
 
         // instructions
         this.instructionGroup = this.game.add.group();
@@ -92,7 +84,6 @@ Play.prototype = {
     },
 
     shutdown: function () {
-        this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
         this.duck.destroy();
         this.pipes.destroy();
         this.scoreboard.destroy();
