@@ -59,6 +59,15 @@ Play.prototype = {
         } else {
             this.game.physics.arcade.collide(this.duck, this.ground, null, null, this);
         }
+
+        // medal sparkles
+        if (this.scoreboard && this.scoreboard.emitter) {
+            this.scoreboard.emitter.forEachAlive(function (particle) {
+                var life = particle.lifespan;
+                var span = this.scoreboard.emitter.lifespan;
+                particle.alpha = (span - Math.abs(life - span / 2)) / this.scoreboard.emitter.lifespan;
+            }, this);
+        }
     },
 
     generatePipes: function () {

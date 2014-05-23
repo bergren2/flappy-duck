@@ -208,21 +208,21 @@ Scoreboard.prototype.show = function(score) {
     }
 
     if (medal) {
-        var emitter = this.game.add.emitter(medal.x, medal.y, 400);
-        this.scoreboard.addChild(emitter);
-        emitter.width = medal.width;
-        emitter.height = medal.height;
+        this.emitter = this.game.add.emitter(medal.x, medal.y, 400);
+        this.scoreboard.addChild(this.emitter);
+        this.emitter.width = medal.width;
+        this.emitter.height = medal.height;
 
-        emitter.makeParticles('particle');
+        this.emitter.makeParticles('particle');
 
-        emitter.setRotation(-100, 100);
-        emitter.setXSpeed(0, 0);
-        emitter.setYSpeed(0, 0);
-        emitter.minParticleScale = 0.25;
-        emitter.maxParticleScale = 0.5;
-        emitter.setAll('body.allowGravity', false);
+        this.emitter.setRotation(-100, 100);
+        this.emitter.setXSpeed(0, 0);
+        this.emitter.setYSpeed(0, 0);
+        this.emitter.minParticleScale = 0.25;
+        this.emitter.maxParticleScale = 0.5;
+        this.emitter.setAll('body.allowGravity', false);
 
-        emitter.start(false, 1000, 1000);
+        this.emitter.start(false, 1000, 1000);
     }
 
     this.game.add.tween(this).to({y: 0}, 1000, Phaser.Easing.Bounce.Out, true);
@@ -357,6 +357,15 @@ Play.prototype = {
             }, this);
         } else {
             this.game.physics.arcade.collide(this.duck, this.ground, null, null, this);
+        }
+
+        // medal sparkles
+        if (this.scoreboard && this.scoreboard.emitter) {
+            this.scoreboard.emitter.forEachAlive(function (particle) {
+                var life = particle.lifespan;
+                var span = this.scoreboard.emitter.lifespan;
+                particle.alpha = (span - Math.abs(life - span / 2)) / this.scoreboard.emitter.lifespan;
+            }, this);
         }
     },
 
