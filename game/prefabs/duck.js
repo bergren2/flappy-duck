@@ -12,6 +12,7 @@ var Duck = function (game, x, y, frame) {
 
     this.game.physics.arcade.enableBody(this);
     this.body.allowGravity = false;
+    this.body.collideWorldBounds = true;
 
     this.flapSound = this.game.add.audio('flap');
 };
