@@ -12,6 +12,8 @@ var Duck = function (game, x, y, frame) {
 
     this.game.physics.arcade.enableBody(this);
     this.body.allowGravity = false;
+
+    this.flapSound = this.game.add.audio('flap');
 };
 
 Duck.prototype = Object.create(Phaser.Sprite.prototype);
@@ -24,6 +26,7 @@ Duck.prototype.update = function () {
 };
 
 Duck.prototype.flap = function () {
+    this.flapSound.play();
     this.body.velocity.y = -400;
     this.game.add.tween(this).to({
         angle: -40

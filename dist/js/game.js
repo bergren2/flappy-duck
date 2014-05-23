@@ -30,6 +30,8 @@ var Duck = function (game, x, y, frame) {
 
     this.game.physics.arcade.enableBody(this);
     this.body.allowGravity = false;
+
+    this.flapSound = this.game.add.audio('flap');
 };
 
 Duck.prototype = Object.create(Phaser.Sprite.prototype);
@@ -42,6 +44,7 @@ Duck.prototype.update = function () {
 };
 
 Duck.prototype.flap = function () {
+    this.flapSound.play();
     this.body.velocity.y = -400;
     this.game.add.tween(this).to({
         angle: -40
@@ -288,6 +291,9 @@ Play.prototype = {
         // score
         this.scoreText = this.game.add.bitmapText(this.game.width / 2, 10, 'flappyfont', this.score.toString(), 24);
         this.scoreText.visible = false;
+
+        // sound
+        this.scoreSound = this.game.add.audio('score');
     },
 
     update: function () {
@@ -336,6 +342,7 @@ Play.prototype = {
             pipeGroup.hasScored = true;
             this.score++;
             this.scoreText.setText(this.score.toString());
+            this.scoreSound.play();
         }
     }
 };
@@ -368,6 +375,12 @@ Preload.prototype = {
 
         var fontDirectory = 'assets/fonts/flappyfont';
         this.load.bitmapFont('flappyfont', fontDirectory + '/flappyfont.png', fontDirectory + '/flappyfont.fnt');
+
+        // sound
+        this.load.audio('score', 'assets/score.wav');
+        this.load.audio('flap', 'assets/flap.wav');
+        this.load.audio('pipeHit', 'assets/pipe-hit.wav');
+        this.load.audio('groundHit', 'assets/ground-hit.wav');
     },
     create: function () {
         this.asset.cropEnabled = false;

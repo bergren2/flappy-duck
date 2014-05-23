@@ -23,6 +23,12 @@ Preload.prototype = {
 
         var fontDirectory = 'assets/fonts/flappyfont';
         this.load.bitmapFont('flappyfont', fontDirectory + '/flappyfont.png', fontDirectory + '/flappyfont.fnt');
+
+        // sound
+        this.load.audio('score', 'assets/score.wav');
+        this.load.audio('flap', 'assets/flap.wav');
+        this.load.audio('pipeHit', 'assets/pipe-hit.wav');
+        this.load.audio('groundHit', 'assets/ground-hit.wav');
     },
     create: function () {
         this.asset.cropEnabled = false;

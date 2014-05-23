@@ -42,6 +42,9 @@ Play.prototype = {
         // score
         this.scoreText = this.game.add.bitmapText(this.game.width / 2, 10, 'flappyfont', this.score.toString(), 24);
         this.scoreText.visible = false;
+
+        // sound
+        this.scoreSound = this.game.add.audio('score');
     },
 
     update: function () {
@@ -90,6 +93,7 @@ Play.prototype = {
             pipeGroup.hasScored = true;
             this.score++;
             this.scoreText.setText(this.score.toString());
+            this.scoreSound.play();
         }
     }
 };
