@@ -23,14 +23,21 @@ Duck.prototype.update = function () {
     if (this.angle < 90 && this.alive) {
         this.angle += 2.5;
     }
+
+    // TODO you can maybe remove this after making pipes not affect dead birds
+    if (this.body.velocity.x !== 0) {
+        this.body.velocity.x = 0;
+    }
 };
 
 Duck.prototype.flap = function () {
-    this.flapSound.play();
-    this.body.velocity.y = -400;
-    this.game.add.tween(this).to({
-        angle: -40
-    }, 100).start();
+    if (this.alive) {
+        this.flapSound.play();
+        this.body.velocity.y = -400;
+        this.game.add.tween(this).to({
+            angle: -40
+        }, 100).start();
+    }
 };
 
 module.exports = Duck;

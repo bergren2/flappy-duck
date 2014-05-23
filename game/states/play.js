@@ -1,7 +1,8 @@
 'use strict';
-var Duck      = require('../prefabs/duck');
-var Ground    = require('../prefabs/ground');
-var PipeGroup = require('../prefabs/pipeGroup');
+var Duck       = require('../prefabs/duck');
+var Ground     = require('../prefabs/ground');
+var PipeGroup  = require('../prefabs/pipeGroup');
+var Scoreboard = require('../prefabs/scoreboard');
 
 function Play() {}
 Play.prototype = {
@@ -12,10 +13,11 @@ Play.prototype = {
         this.score = 0;
 
         // prefabs
+        this.pipes = this.game.add.group();
+
         this.duck = new Duck(this.game, 100, this.game.height / 2);
         this.game.add.existing(this.duck);
 
-        this.pipes = this.game.add.group();
 
         this.ground = new Ground(this.game, 0, 400, 335, 112);
         this.game.add.existing(this.ground);
@@ -48,11 +50,15 @@ Play.prototype = {
     },
 
     update: function () {
-        this.game.physics.arcade.collide(this.duck, this.ground, this.deathHandler, null, this);
-        this.pipes.forEach(function (pipeGroup) {
-            this.checkScore(pipeGroup);
-            this.game.physics.arcade.collide(this.duck, pipeGroup, this.deathHandler, null, this);
-        }, this);
+        if (this.duck.alive) {
+            this.game.physics.arcade.collide(this.duck, this.ground, this.deathHandler, null, this);
+            this.pipes.forEach(function (pipeGroup) {
+                this.checkScore(pipeGroup);
+                this.game.physics.arcade.collide(this.duck, pipeGroup, this.deathHandler, null, this);
+            }, this);
+        } else {
+            this.game.physics.arcade.collide(this.duck, this.ground, null, null, this);
+        }
     },
 
     generatePipes: function () {
@@ -67,13 +73,20 @@ Play.prototype = {
     },
 
     deathHandler: function () {
-        this.game.state.start('gameover');
+        this.duck.alive = false;
+        this.pipes.callAll('stop');
+        this.pipeGenerator.timer.stop();
+        this.ground.stopScroll();
+        this.scoreboard = new Scoreboard(this.game);
+        this.game.add.existing(this.scoreboard);
+        this.scoreboard.show(this.score);
     },
 
     shutdown: function () {
         this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
         this.duck.destroy();
         this.pipes.destroy();
+        this.scoreboard.destroy();
     },
 
     startGame: function () {

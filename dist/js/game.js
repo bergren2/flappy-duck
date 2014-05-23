@@ -7,7 +7,6 @@ window.onload = function () {
 
   // Game States
   game.state.add('boot', require('./states/boot'));
-  game.state.add('gameover', require('./states/gameover'));
   game.state.add('menu', require('./states/menu'));
   game.state.add('play', require('./states/play'));
   game.state.add('preload', require('./states/preload'));
@@ -15,7 +14,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":6,"./states/gameover":7,"./states/menu":8,"./states/play":9,"./states/preload":10}],2:[function(require,module,exports){
+},{"./states/boot":7,"./states/menu":8,"./states/play":9,"./states/preload":10}],2:[function(require,module,exports){
 'use strict';
 
 var Duck = function (game, x, y, frame) {
@@ -41,14 +40,21 @@ Duck.prototype.update = function () {
     if (this.angle < 90 && this.alive) {
         this.angle += 2.5;
     }
+
+    // TODO you can maybe remove this after making pipes not affect dead birds
+    if (this.body.velocity.x !== 0) {
+        this.body.velocity.x = 0;
+    }
 };
 
 Duck.prototype.flap = function () {
-    this.flapSound.play();
-    this.body.velocity.y = -400;
-    this.game.add.tween(this).to({
-        angle: -40
-    }, 100).start();
+    if (this.alive) {
+        this.flapSound.play();
+        this.body.velocity.y = -400;
+        this.game.add.tween(this).to({
+            angle: -40
+        }, 100).start();
+    }
 };
 
 module.exports = Duck;
@@ -136,9 +142,99 @@ PipeGroup.prototype.update = function () {
     this.checkWorldBounds();
 };
 
+PipeGroup.prototype.stop = function () {
+    this.setAll('body.velocity.x', 0);
+};
+
 module.exports = PipeGroup;
 
 },{"./pipe":4}],6:[function(require,module,exports){
+'use strict';
+
+var Scoreboard = function(game) {
+    var gameover;
+
+    Phaser.Group.call(this, game);
+    gameover = this.create(this.game.width / 2,  100, 'gameover');
+    gameover.anchor.setTo(0.5, 0.5);
+
+    this.scoreboard = this.create(this.game.width / 2, 200, 'scoreboard');
+    this.scoreboard.anchor.setTo(0.5, 0.5);
+
+    this.scoreText = this.game.add.bitmapText(this.scoreboard.width, 180, 'flappyfont', '', 18);
+    this.add(this.scoreText);
+
+    this.bestScoreText = this.game.add.bitmapText(this.scoreboard.width, 230, 'flappyfont', '', 18);
+    this.add(this.bestScoreText);
+
+    // start button
+    this.startButton = this.game.add.button(this.game.width / 2, 300, 'startButton', this.startClick, this);
+    this.startButton.anchor.setTo(0.5, 0.5);
+    this.add(this.startButton);
+
+    this.y = this.game.height;
+    this.x = 0;
+};
+
+Scoreboard.prototype = Object.create(Phaser.Group.prototype);
+Scoreboard.prototype.constructor = Scoreboard;
+
+Scoreboard.prototype.show = function(score) {
+    var medal, bestScore;
+
+    this.scoreText.setText(score.toString());
+
+    if (!!localStorage) {
+        bestScore = localStorage.getItem('bestScore');
+
+        if (!bestScore || bestScore < score) {
+            bestScore = score;
+            localStorage.setItem('bestScore', bestScore);
+        }
+    } else {
+        bestScore = 'N/A';
+    }
+
+    this.bestScoreText.setText(bestScore.toString());
+
+    if (score >= 10 && score < 25) {
+        medal = this.game.add.sprite(-65, 7, 'medals', 1);
+        medal.anchor.setTo(0.5, 0.5);
+        this.scoreboard.addChild(medal);
+    } else if (score >= 25) {
+        medal = this.game.add.sprite(-65, 7, 'medals', 0);
+        medal.anchor.setTo(0.5, 0.5);
+        this.scoreboard.addChild(medal);
+    }
+
+    if (medal) {
+        var emitter = this.game.add.emitter(medal.x, medal.y, 400);
+        this.scoreboard.addChild(emitter);
+        emitter.width = medal.width;
+        emitter.height = medal.height;
+
+        emitter.makeParticles('particle');
+
+        emitter.setRotation(-100, 100);
+        emitter.setXSpeed(0, 0);
+        emitter.setYSpeed(0, 0);
+        emitter.minParticleScale = 0.25;
+        emitter.maxParticleScale = 0.5;
+        emitter.setAll('body.allowGravity', false);
+
+        emitter.start(false, 1000, 1000);
+    }
+
+    this.game.add.tween(this).to({y: 0}, 1000, Phaser.Easing.Bounce.Out, true);
+};
+
+Scoreboard.prototype.startClick = function () {
+    this.game.state.start('play');
+};
+
+module.exports = Scoreboard;
+
+},{}],7:[function(require,module,exports){
 
 'use strict';
 
@@ -156,52 +252,6 @@ Boot.prototype = {
 };
 
 module.exports = Boot;
-
-},{}],7:[function(require,module,exports){
-
-'use strict';
-function GameOver() {}
-
-GameOver.prototype = {
-    preload: function () {
-    },
-
-    create: function () {
-        var style = {
-            font: '32px Arial',
-            fill: '#ffffff',
-            align: 'center'
-        };
-        this.titleText = this.game.add.text(this.game.world.centerX, 100, 'Game Over.', style);
-        this.titleText.anchor.setTo(0.5, 0.5);
-
-        this.congratsText = this.game.add.text(
-            this.game.world.centerX, 200, 'You Win!', {
-                font: '32px Arial',
-                fill: '#ffffff',
-                align: 'center'
-            }
-        );
-        this.congratsText.anchor.setTo(0.5, 0.5);
-
-        this.instructionText = this.game.add.text(
-            this.game.world.centerX, 300, 'Click To Play Again', {
-                font: '16px Arial',
-                fill: '#ffffff',
-                align: 'center'
-            }
-        );
-        this.instructionText.anchor.setTo(0.5, 0.5);
-    },
-
-    update: function () {
-        if (this.game.input.activePointer.justPressed()) {
-            this.game.state.start('play');
-        }
-    }
-};
-
-module.exports = GameOver;
 
 },{}],8:[function(require,module,exports){
 'use strict';
@@ -248,9 +298,10 @@ module.exports = Menu;
 
 },{}],9:[function(require,module,exports){
 'use strict';
-var Duck      = require('../prefabs/duck');
-var Ground    = require('../prefabs/ground');
-var PipeGroup = require('../prefabs/pipeGroup');
+var Duck       = require('../prefabs/duck');
+var Ground     = require('../prefabs/ground');
+var PipeGroup  = require('../prefabs/pipeGroup');
+var Scoreboard = require('../prefabs/scoreboard');
 
 function Play() {}
 Play.prototype = {
@@ -261,10 +312,11 @@ Play.prototype = {
         this.score = 0;
 
         // prefabs
+        this.pipes = this.game.add.group();
+
         this.duck = new Duck(this.game, 100, this.game.height / 2);
         this.game.add.existing(this.duck);
 
-        this.pipes = this.game.add.group();
 
         this.ground = new Ground(this.game, 0, 400, 335, 112);
         this.game.add.existing(this.ground);
@@ -297,11 +349,15 @@ Play.prototype = {
     },
 
     update: function () {
-        this.game.physics.arcade.collide(this.duck, this.ground, this.deathHandler, null, this);
-        this.pipes.forEach(function (pipeGroup) {
-            this.checkScore(pipeGroup);
-            this.game.physics.arcade.collide(this.duck, pipeGroup, this.deathHandler, null, this);
-        }, this);
+        if (this.duck.alive) {
+            this.game.physics.arcade.collide(this.duck, this.ground, this.deathHandler, null, this);
+            this.pipes.forEach(function (pipeGroup) {
+                this.checkScore(pipeGroup);
+                this.game.physics.arcade.collide(this.duck, pipeGroup, this.deathHandler, null, this);
+            }, this);
+        } else {
+            this.game.physics.arcade.collide(this.duck, this.ground, null, null, this);
+        }
     },
 
     generatePipes: function () {
@@ -316,13 +372,20 @@ Play.prototype = {
     },
 
     deathHandler: function () {
-        this.game.state.start('gameover');
+        this.duck.alive = false;
+        this.pipes.callAll('stop');
+        this.pipeGenerator.timer.stop();
+        this.ground.stopScroll();
+        this.scoreboard = new Scoreboard(this.game);
+        this.game.add.existing(this.scoreboard);
+        this.scoreboard.show(this.score);
     },
 
     shutdown: function () {
         this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
         this.duck.destroy();
         this.pipes.destroy();
+        this.scoreboard.destroy();
     },
 
     startGame: function () {
@@ -349,7 +412,7 @@ Play.prototype = {
 
 module.exports = Play;
 
-},{"../prefabs/duck":2,"../prefabs/ground":3,"../prefabs/pipeGroup":5}],10:[function(require,module,exports){
+},{"../prefabs/duck":2,"../prefabs/ground":3,"../prefabs/pipeGroup":5,"../prefabs/scoreboard":6}],10:[function(require,module,exports){
 'use strict';
 function Preload() {
     this.asset = null;
@@ -369,6 +432,10 @@ Preload.prototype = {
         this.load.image('startButton', 'assets/start-button.png');
         this.load.image('instructions', 'assets/instructions.png');
         this.load.image('getReady', 'assets/get-ready.png');
+        this.load.image('scoreboard', 'assets/scoreboard.png');
+        this.load.image('gameover', 'assets/gameover.png');
+        this.load.spritesheet('medals', 'assets/medals.png', 44, 46, 2);
+        this.load.image('particle', 'assets/particle.png');
 
         this.load.spritesheet('duck', 'assets/duck.png', 34, 24, 3);
         this.load.spritesheet('pipe', 'assets/pipes.png', 54, 320, 2);
